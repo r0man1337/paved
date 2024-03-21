@@ -8,7 +8,6 @@ import {
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
@@ -24,7 +23,7 @@ import { Button } from "@/components/ui/button";
 
 import { useState, useEffect, useMemo } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTrophy } from "@fortawesome/free-solid-svg-icons";
+import { faCamera, faTrophy } from "@fortawesome/free-solid-svg-icons";
 import { useDojo } from "@/dojo/useDojo";
 import { useQueryParams } from "@/hooks/useQueryParams";
 import { shortString } from "starknet";
@@ -42,6 +41,7 @@ import { faXTwitter } from "@fortawesome/free-brands-svg-icons";
 import { useGame } from "@/hooks/useGame";
 import { useBuilder } from "@/hooks/useBuilder";
 import { usePlayer } from "@/hooks/usePlayer";
+import html2canvas from "html2canvas";
 
 export const LeaderboardDialog = () => {
   const { gameId } = useQueryParams();
@@ -57,6 +57,7 @@ export const LeaderboardDialog = () => {
 
   const [open, setOpen] = useState(false);
   const [over, setOver] = useState(false);
+  const [screenshotProcessing, setScreenshotProcessing] = useState(false);
 
   useEffect(() => {
     if (game) {
@@ -69,6 +70,42 @@ export const LeaderboardDialog = () => {
       return () => clearInterval(interval);
     }
   }, [game, over]);
+
+  useEffect(() => {
+    if (screenshotProcessing && !open) {
+      html2canvas(document.body).then((canvas) => {
+        const dataURL = canvas.toDataURL();
+        console.log(dataURL);
+        // Convertir le canvas en blob
+        canvas.toBlob((blob) => {
+          // Créer un ClipboardItem contenant l'image
+          if (!blob) return;
+          const item = new ClipboardItem({ "image/png": blob });
+
+          // Copier le ClipboardItem dans le presse-papiers
+          navigator.clipboard
+            .write([item])
+            .then(() => {
+              setScreenshotProcessing(false);
+              setOpen(true); // Réouvrir la modale après la capture d'écran
+            })
+            .catch((error) => {
+              console.error(
+                "Impossible de copier l'image dans le presse-papiers:",
+                error
+              );
+              setScreenshotProcessing(false);
+              setOpen(true);
+            });
+        }, "image/png");
+      });
+    }
+  }, [screenshotProcessing, open]);
+
+  const handleScreenshot = () => {
+    setScreenshotProcessing(true);
+    setOpen(false); // Fermer la modale avant de prendre le screenshot
+  };
 
   if (!game) return null;
 
@@ -88,22 +125,50 @@ export const LeaderboardDialog = () => {
           </Tooltip>
         </TooltipProvider>
       </DialogTrigger>
-      <DialogContent>
-        <DialogHeader className="flex items-center">Leaderboard</DialogHeader>
-        {over && builder && <Description game={game} />}
-        <Leaderboard />
-        {over && !game.isSoloMode() && builder && <Reward />}
-      </DialogContent>
+      {!screenshotProcessing && (
+        <DialogContent>
+          <DialogHeader className="flex items-center">Leaderboard</DialogHeader>
+          {over && builder && (
+            <Description game={game} handleScreenshot={handleScreenshot} />
+          )}
+          <Leaderboard />
+          {over && !game.isSoloMode() && builder && <Reward />}
+        </DialogContent>
+      )}
     </Dialog>
   );
 };
 
-export const Description = ({ game }: { game: any }) => {
+export const Description = ({
+  game,
+  handleScreenshot,
+}: {
+  game: any;
+  handleScreenshot: () => void;
+}) => {
   return (
     <DialogDescription className="flex justify-center items-center gap-3 text-xs">
       Game is over!
+      <Screenshot handleScreenshot={handleScreenshot} />
       {game.isSoloMode() && <Share score={game.score} />}
     </DialogDescription>
+  );
+};
+
+export const Screenshot = ({
+  handleScreenshot,
+}: {
+  handleScreenshot: () => void;
+}) => {
+  return (
+    <Button
+      className="flex gap-2 w-auto p-2 text-xs"
+      variant={"secondary"}
+      size={"icon"}
+      onClick={handleScreenshot}
+    >
+      <FontAwesomeIcon icon={faCamera} />
+    </Button>
   );
 };
 
