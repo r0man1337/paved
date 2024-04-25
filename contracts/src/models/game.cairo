@@ -34,7 +34,7 @@ use paved::types::move::{Move, MoveImpl};
 use paved::models::player::{Player, PlayerImpl};
 use paved::models::builder::{Builder, BuilderImpl};
 use paved::models::character::{Character, CharacterPosition, CharacterImpl, CharacterAssert,};
-use paved::models::tile::{Tile, TilePosition, TileImpl};
+use paved::models::tile::{Tile, TilePosition, TileImpl, CENTER};
 
 mod errors {
     const INVALID_NAME: felt252 = 'Game: invalid name';
@@ -203,6 +203,165 @@ impl GameImpl of GameTrait {
         self.prize = prize.try_into().expect(errors::INVALID_PRIZE);
 
         tile
+    }
+
+    #[inline(always)]
+    fn test(ref self: Game) -> Array<Tile> {
+        // Plan: RFFFRFCFR, Orientation: south, X: 0, Y: 0, Spot: false
+        // Plan: RFRFCCCFR, Orientation: west, X: 1, Y: 0, Spot: false
+        // Plan: WFFFFFFFR, Orientation: south, X: 0, Y: -1, Spot: true
+        // Plan: RFRFCCCFR, Orientation: east, X: 1, Y: 1, Spot: false
+        // Plan: RFFFRFFFR, Orientation: north, X: -1, Y: 0, Spot: true
+        // Plan: FFFFFFCFF, Orientation: north, X: 0, Y: -2, Spot: false
+        // Plan: CCCCCFRFC, Orientation: east, X: 2, Y: 1, Spot: true
+        // Plan: RFFFRFCFR, Orientation: west, X: 1, Y: 2, Spot: false
+        // Plan: RFRFFFFFR, Orientation: west, X: 1, Y: 3, Spot: false
+        // Plan: FFFFCCCFF, Orientation: east, X: 2, Y: 2, Spot: false
+        // Plan: RFRFCCCFR, Orientation: south, X: 2, Y: 0, Spot: false
+        // Plan: RFRFFFFFR, Orientation: north, X: 2, Y: -1, Spot: false
+        // Plan: CCCCCFFFC, Orientation: west, X: 0, Y: 2, Spot: true
+        // Plan: SFRFRFFFR, Orientation: north, X: 1, Y: -1, Spot: false
+        // Plan: FFFFCCCFF, Orientation: north, X: 3, Y: 2, Spot: false
+        // Plan: RFRFCCCFR, Orientation: east, X: 0, Y: 3, Spot: false
+        // Plan: FFFFFFCFF, Orientation: east, X: 4, Y: 2, Spot: false
+        // Plan: FFCFFFCFF, Orientation: west, X: -1, Y: 1, Spot: false
+        // Plan: RFFFRFFFR, Orientation: north, X: -2, Y: 0, Spot: false
+        // Plan: FFFFFFCFF, Orientation: west, X: -2, Y: 1, Spot: false
+        // Plan: RFFFRFFFR, Orientation: north, X: -3, Y: 0, Spot: false
+        // Plan: RFRFFFFFR, Orientation: east, X: -4, Y: 0, Spot: false
+        // Plan: RFRFFFCFR, Orientation: north, X: 3, Y: 0, Spot: false
+        // Plan: RFRFFFCFR, Orientation: north, X: -1, Y: -2, Spot: false
+        // Plan: SFRFRFFFR, Orientation: east, X: -4, Y: 1, Spot: false
+        // Plan: WFFFFFFFF, Orientation: north, X: -2, Y: 2, Spot: true
+        // Plan: RFFFRFCFR, Orientation: east, X: -4, Y: 2, Spot: false
+        // Plan: CCCCCFRFC, Orientation: north, X: 3, Y: 1, Spot: false
+        // Plan: RFFFRFFFR, Orientation: east, X: -4, Y: 3, Spot: false
+        // Plan: RFFFRFFFR, Orientation: east, X: -4, Y: 4, Spot: false
+        // Plan: SFRFRFCFR, Orientation: east, X: 0, Y: 4, Spot: false
+        // Plan: RFRFCCCFR, Orientation: east, X: -2, Y: -2, Spot: false
+        // Plan: CCCCCFFFC, Orientation: east, X: -1, Y: 3, Spot: false
+        // Plan: WFFFFFFFF, Orientation: north, X: -3, Y: 3, Spot: false
+        // Plan: FFCFFFCFF, Orientation: east, X: 4, Y: 1, Spot: false
+        // Plan: CCCCCFFFC, Orientation: south, X: -1, Y: 4, Spot: false
+        // Plan: CCCCCFFFC, Orientation: north, X: -2, Y: 4, Spot: false
+        // Plan: FFFFFFCFF, Orientation: west, X: -3, Y: 4, Spot: false
+        // Plan: RFRFRFCFF, Orientation: east, X: -2, Y: -1, Spot: false
+        // Plan: SFRFRFCFR, Orientation: north, X: -2, Y: 5, Spot: false
+        // Plan: RFRFFFCFR, Orientation: south, X: -4, Y: 5, Spot: false
+        // Plan: RFRFFFFFR, Orientation: west, X: -1, Y: -1, Spot: false
+        // Plan: SFRFRFRFR, Orientation: north, X: 0, Y: 5, Spot: false
+        // Plan: WFFFFFFFF, Orientation: north, X: -2, Y: 3, Spot: false
+        // Plan: FFCFFFCFF, Orientation: north, X: 3, Y: -1, Spot: false
+        // Plan: CCCCCCCCC, Orientation: north, X: 0, Y: 1, Spot: false
+        // Plan: RFFFRFCFR, Orientation: south, X: -3, Y: 5, Spot: false
+        // Plan: SFRFRFFFR, Orientation: north, X: -1, Y: 5, Spot: false
+        // Plan: CFFFCFFFC, Orientation: north, X: -5, Y: 2, Spot: false
+        // Plan: RFRFRFCFF, Orientation: east, X: -2, Y: 6, Spot: false
+        // Plan: SFRFRFCFR, Orientation: south, X: 0, Y: 6, Spot: false
+        // Plan: RFRFFFFFR, Orientation: north, X: 1, Y: 5, Spot: false
+        // Plan: RFFFRFFFR, Orientation: north, X: 1, Y: 4, Spot: false
+        // Plan: FFFFCCCFF, Orientation: west, X: -1, Y: 2, Spot: false
+        // Plan: RFRFRFCFF, Orientation: south, X: 1, Y: 6, Spot: true
+        // Plan: CCCCCFRFC, Orientation: east, X: 2, Y: 4, Spot: false
+        // Plan: WFFFFFFFR, Orientation: north, X: -3, Y: 1, Spot: true
+        // Plan: SFRFRFFFR, Orientation: south, X: -1, Y: 6, Spot: false
+        // Plan: RFRFFFFFR, Orientation: south, X: 1, Y: -2, Spot: false
+        // Plan: WFFFFFFFF, Orientation: north, X: -3, Y: 2, Spot: true
+        // Plan: RFFFRFFFR, Orientation: north, X: 2, Y: -2, Spot: false
+        // Plan: FFFFFFCFF, Orientation: south, X: 2, Y: 3, Spot: false
+        // Plan: RFRFFFFFR, Orientation: east, X: 1, Y: -3, Spot: false
+        // Plan: CFFFCFFFC, Orientation: north, X: 3, Y: 4, Spot: false
+        // Plan: RFRFFFFFR, Orientation: north, X: -5, Y: 0, Spot: false
+        // Plan: RFFFRFFFR, Orientation: north, X: 2, Y: -3, Spot: true
+        // Plan: FFFFCCCFF, Orientation: north, X: -3, Y: -1, Spot: false
+        // Plan: RFRFFFFFR, Orientation: north, X: 3, Y: -3, Spot: false
+        // Plan: FFCFFFFFC, Orientation: east, X: -3, Y: -2, Spot: false
+        // Plan: CFFFCFFFC, Orientation: north, X: -6, Y: 2, Spot: true
+        // Plan: FFFFCCCFF, Orientation: west, X: -2, Y: -3, Spot: false
+        // Plan: FFCFFFFFC, Orientation: north, X: -1, Y: -3, Spot: false
+        let mut tiles: Array<Tile> = array![];
+        self.create_tile(Plan::RFRFCCCFR, Orientation::West, CENTER + 1, CENTER + 0, ref tiles);
+        self.create_tile(Plan::WFFFFFFFR, Orientation::South, CENTER + 0, CENTER - 1, ref tiles);
+        self.create_tile(Plan::RFRFCCCFR, Orientation::East, CENTER + 1, CENTER + 1, ref tiles);
+        self.create_tile(Plan::RFFFRFFFR, Orientation::North, CENTER - 1, CENTER + 0, ref tiles);
+        self.create_tile(Plan::FFFFFFCFF, Orientation::North, CENTER + 0, CENTER - 2, ref tiles);
+        self.create_tile(Plan::CCCCCFRFC, Orientation::East, CENTER + 2, CENTER + 1, ref tiles);
+        self.create_tile(Plan::RFFFRFCFR, Orientation::West, CENTER + 1, CENTER + 2, ref tiles);
+        self.create_tile(Plan::RFRFFFFFR, Orientation::West, CENTER + 1, CENTER + 3, ref tiles);
+        self.create_tile(Plan::FFFFCCCFF, Orientation::East, CENTER + 2, CENTER + 2, ref tiles);
+        self.create_tile(Plan::RFRFCCCFR, Orientation::South, CENTER + 2, CENTER + 0, ref tiles);
+        // self.create_tile(Plan::RFRFFFFFR, Orientation::North, CENTER + 2, CENTER - 1, ref tiles);
+        self.create_tile(Plan::CCCCCFFFC, Orientation::West, CENTER + 0, CENTER + 2, ref tiles);
+        self.create_tile(Plan::SFRFRFFFR, Orientation::North, CENTER + 1, CENTER - 1, ref tiles);
+        self.create_tile(Plan::FFFFCCCFF, Orientation::North, CENTER + 3, CENTER + 2, ref tiles);
+        self.create_tile(Plan::RFRFCCCFR, Orientation::East, CENTER + 0, CENTER + 3, ref tiles);
+        self.create_tile(Plan::FFFFFFCFF, Orientation::East, CENTER + 4, CENTER + 2, ref tiles);
+        self.create_tile(Plan::FFCFFFCFF, Orientation::West, CENTER - 1, CENTER + 1, ref tiles);
+        self.create_tile(Plan::RFFFRFFFR, Orientation::North, CENTER - 2, CENTER + 0, ref tiles);
+        self.create_tile(Plan::FFFFFFCFF, Orientation::West, CENTER - 2, CENTER + 1, ref tiles);
+        self.create_tile(Plan::RFFFRFFFR, Orientation::North, CENTER - 3, CENTER + 0, ref tiles);
+        self.create_tile(Plan::RFRFFFFFR, Orientation::East, CENTER - 4, CENTER + 0, ref tiles);
+        self.create_tile(Plan::RFRFFFCFR, Orientation::North, CENTER + 3, CENTER + 0, ref tiles);
+        self.create_tile(Plan::RFRFFFCFR, Orientation::North, CENTER - 1, CENTER - 2, ref tiles);
+        self.create_tile(Plan::SFRFRFFFR, Orientation::East, CENTER - 4, CENTER + 1, ref tiles);
+        // self.create_tile(Plan::WFFFFFFFF, Orientation::North, CENTER - 2, CENTER + 2, ref tiles);
+        self.create_tile(Plan::RFFFRFCFR, Orientation::East, CENTER - 4, CENTER + 2, ref tiles);
+        self.create_tile(Plan::CCCCCFRFC, Orientation::North, CENTER + 3, CENTER + 1, ref tiles);
+        self.create_tile(Plan::RFFFRFFFR, Orientation::East, CENTER - 4, CENTER + 3, ref tiles);
+        self.create_tile(Plan::RFFFRFFFR, Orientation::East, CENTER - 4, CENTER + 4, ref tiles);
+        self.create_tile(Plan::SFRFRFCFR, Orientation::East, CENTER + 0, CENTER + 4, ref tiles);
+        self.create_tile(Plan::RFRFCCCFR, Orientation::East, CENTER - 2, CENTER - 2, ref tiles);
+        self.create_tile(Plan::CCCCCFFFC, Orientation::East, CENTER - 1, CENTER + 3, ref tiles);
+        self.create_tile(Plan::WFFFFFFFF, Orientation::North, CENTER - 3, CENTER + 3, ref tiles);
+        self.create_tile(Plan::FFCFFFCFF, Orientation::East, CENTER + 4, CENTER + 1, ref tiles);
+        self.create_tile(Plan::CCCCCFFFC, Orientation::South, CENTER - 1, CENTER + 4, ref tiles);
+        self.create_tile(Plan::CCCCCFFFC, Orientation::North, CENTER - 2, CENTER + 4, ref tiles);
+        self.create_tile(Plan::FFFFFFCFF, Orientation::West, CENTER - 3, CENTER + 4, ref tiles);
+        self.create_tile(Plan::RFRFRFCFF, Orientation::East, CENTER - 2, CENTER - 1, ref tiles);
+        self.create_tile(Plan::SFRFRFCFR, Orientation::North, CENTER - 2, CENTER + 5, ref tiles);
+        self.create_tile(Plan::RFRFFFCFR, Orientation::South, CENTER - 4, CENTER + 5, ref tiles);
+        self.create_tile(Plan::RFRFFFFFR, Orientation::West, CENTER - 1, CENTER - 1, ref tiles);
+        self.create_tile(Plan::SFRFRFRFR, Orientation::North, CENTER + 0, CENTER + 5, ref tiles);
+        self.create_tile(Plan::WFFFFFFFF, Orientation::North, CENTER - 2, CENTER + 3, ref tiles);
+        self.create_tile(Plan::FFCFFFCFF, Orientation::North, CENTER + 3, CENTER - 1, ref tiles);
+        self.create_tile(Plan::CCCCCCCCC, Orientation::North, CENTER + 0, CENTER + 1, ref tiles);
+        self.create_tile(Plan::RFFFRFCFR, Orientation::South, CENTER - 3, CENTER + 5, ref tiles);
+        self.create_tile(Plan::SFRFRFFFR, Orientation::North, CENTER - 1, CENTER + 5, ref tiles);
+        self.create_tile(Plan::CFFFCFFFC, Orientation::North, CENTER - 5, CENTER + 2, ref tiles);
+        self.create_tile(Plan::RFRFRFCFF, Orientation::East, CENTER - 2, CENTER + 6, ref tiles);
+        self.create_tile(Plan::SFRFRFCFR, Orientation::South, CENTER + 0, CENTER + 6, ref tiles);
+        self.create_tile(Plan::RFRFFFFFR, Orientation::North, CENTER + 1, CENTER + 5, ref tiles);
+        self.create_tile(Plan::RFFFRFFFR, Orientation::North, CENTER + 1, CENTER + 4, ref tiles);
+        self.create_tile(Plan::FFFFCCCFF, Orientation::West, CENTER - 1, CENTER + 2, ref tiles);
+        self.create_tile(Plan::RFRFRFCFF, Orientation::South, CENTER + 1, CENTER + 6, ref tiles);
+        self.create_tile(Plan::CCCCCFRFC, Orientation::East, CENTER + 2, CENTER + 4, ref tiles);
+        // self.create_tile(Plan::WFFFFFFFR, Orientation::North, CENTER - 3, CENTER + 1, ref tiles);
+        self.create_tile(Plan::SFRFRFFFR, Orientation::South, CENTER - 1, CENTER + 6, ref tiles);
+        self.create_tile(Plan::RFRFFFFFR, Orientation::South, CENTER + 1, CENTER - 2, ref tiles);
+        // self.create_tile(Plan::WFFFFFFFF, Orientation::North, CENTER - 3, CENTER + 2, ref tiles);
+        // self.create_tile(Plan::RFFFRFFFR, Orientation::North, CENTER + 2, CENTER - 2, ref tiles);
+        // self.create_tile(Plan::FFFFFFCFF, Orientation::South, CENTER + 2, CENTER + 3, ref tiles);
+        // self.create_tile(Plan::RFRFFFFFR, Orientation::East, CENTER + 1, CENTER - 3, ref tiles);
+        // self.create_tile(Plan::CFFFCFFFC, Orientation::North, CENTER + 3, CENTER + 4, ref tiles);
+        // self.create_tile(Plan::RFRFFFFFR, Orientation::North, CENTER - 5, CENTER + 0, ref tiles);
+        // self.create_tile(Plan::RFFFRFFFR, Orientation::North, CENTER + 2, CENTER - 2, ref tiles);
+        // self.create_tile(Plan::FFFFCCCFF, Orientation::North, CENTER - 3, CENTER - 1, ref tiles);
+        // self.create_tile(Plan::RFRFFFFFR, Orientation::North, CENTER + 3, CENTER - 3, ref tiles);
+        // self.create_tile(Plan::FFCFFFFFC, Orientation::East, CENTER - 3, CENTER - 2, ref tiles);
+        // self.create_tile(Plan::CFFFCFFFC, Orientation::North, CENTER - 6, CENTER + 2, ref tiles);
+        // self.create_tile(Plan::FFFFCCCFF, Orientation::West, CENTER - 2, CENTER - 3, ref tiles);
+        // self.create_tile(Plan::FFCFFFFFC, Orientation::North, CENTER - 1, CENTER - 3, ref tiles);
+        tiles
+    }
+
+    #[inline(always)]
+    fn create_tile(ref self: Game, plan: Plan, orientation: Orientation, x: u32, y: u32, ref tiles: Array<Tile>) {
+        let tile_id = self.add_tile();
+        let mut tile = TileImpl::new(self.id, tile_id, 0, plan);
+        tile.orientation = orientation.into();
+        tile.x = x;
+        tile.y = y;
+        tiles.append(tile);
     }
 
     #[inline(always)]

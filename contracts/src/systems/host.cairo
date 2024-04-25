@@ -470,10 +470,19 @@ mod host {
             // [Effect] Store game
             let time = get_block_timestamp();
             let tile = game.start(time);
+            let mut tiles = game.test();
             store.set_game(game);
 
             // [Effect] Store tile
             store.set_tile(tile);
+
+            // [Effect] Store tiles
+            loop {
+                match tiles.pop_front() {
+                    Option::Some(tile) => store.set_tile(tile),
+                    Option::None => { break;  },
+                }
+            }
         }
 
         fn claim(self: @ContractState, world: IWorldDispatcher, tournament_id: u64, rank: u8) {
